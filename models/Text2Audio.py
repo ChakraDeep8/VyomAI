@@ -112,7 +112,7 @@ def text2audio():
                 audio_generation(prompt)
     def text2speech_module():
         text_input = st.text_area("Enter text to convert to speech:")
-        language = st.selectbox("Select Language", ("en", "es", "fr", "bn"))
+        language = st.selectbox("Select Language", ("en", "bn", "es", "fr", "hi"))
         if st.button("Generate my speech"):
             if text_input:
                 tts = gTTS(text=text_input, lang=language)

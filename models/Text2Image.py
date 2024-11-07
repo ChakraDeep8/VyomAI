@@ -78,7 +78,7 @@ def gemini_text2image():
                 {"role": "assistant", "content": f"Generated image based on prompt: {input_prompt}", "image": input_prompt}
             )
             with st.chat_message("assistant"):
-                st.image(image, caption=input_prompt, use_column_width=True)
+                st.image(image, caption=input_prompt, width=150)
         except (UnidentifiedImageError, IOError) as e:
             error_msg = str(e) if status_code != 200 else "Failed to generate image."
             st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})
