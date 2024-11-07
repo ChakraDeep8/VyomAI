@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -8,9 +9,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 import asyncio
+from dotenv import load_dotenv
 
 def gemini_pdf_chat():
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    load_dotenv()
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
     def get_or_create_eventloop():
         try:

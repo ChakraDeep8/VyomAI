@@ -8,7 +8,8 @@ from datetime import datetime
 
 
 def gemini_image_chat():
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    load_dotenv()
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
     # Function to get response from the Gemini model
     def get_gemini_response(user_input, image):

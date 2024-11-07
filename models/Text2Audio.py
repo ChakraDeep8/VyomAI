@@ -48,6 +48,7 @@ def text2audio():
                     )
                     with st.chat_message("assistant"):
                         st.audio(audio_stream, format="audio/wav")
+                        btn = st.download_button(label="Download",data=audio_stream,file_name="audio.wav",mime="audio/wav")
                 except IOError as e:
                     error_msg = f"IOError: {str(e)}"
                     st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})

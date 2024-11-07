@@ -4,9 +4,11 @@ import streamlit as st
 from typing import Generator
 from groq import Groq
 from datetime import datetime
-def chat_groq():
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+from dotenv import load_dotenv
 
+def chat_groq():
+    load_dotenv()
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     def icon(emoji: str):
         """Shows an emoji as a Notion-style page icon."""
         st.write(
