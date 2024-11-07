@@ -6,20 +6,7 @@ from groq import Groq
 from typing import Generator
 
 def text2audio():
-    option = st.sidebar.selectbox("Select an option", ("Text to Speech", "Text to audio"))
-
-    if option != "Text to audio generator":
-        text_input = st.text_area("Enter text to convert to speech:")
-        language = st.selectbox("Select Language", ("en", "es", "fr", "bn"))
-        if st.button("Generate my speech"):
-            if text_input:
-                tts = gTTS(text=text_input, lang=language)
-                audio_stream = BytesIO()
-                tts.write_to_fp(audio_stream)
-                st.audio(audio_stream, format="audio/wav")
-            else:
-                st.warning("Please enter some text to convert to speech.")
-    elif option == "Text to audio generator":
+    def text2audio_module():
         # Initialize Groq client
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         model = "mixtral-8x7b-32768"
@@ -53,7 +40,7 @@ def text2audio():
                 # Save audio to a local file for inspection
                 with open("generated_audio.wav", "wb") as audio_file:
                     audio_file.write(audio_bytes)
-                
+
                 try:
                     audio_stream = BytesIO(audio_bytes)  # Convert bytes to an audio stream
                     st.session_state.session_state_history.append(
@@ -88,12 +75,13 @@ def text2audio():
         if prompt := st.sidebar.chat_input("Enter keyword for audio prompt..."):
             descriptive_prompt = template(prompt)
             st.session_state.session_state_history.append({"role": "user", "content": descriptive_prompt})
-            
+
             # Generate a descriptive prompt using Groq
             try:
                 chat_completion = client.chat.completions.create(
                     model=model,
-                    messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.session_state_history],
+                    messages=[{"role": m["role"], "content": m["content"]} for m in
+                              st.session_state.session_state_history],
                     max_tokens=100,
                     stream=True
                 )
@@ -121,3 +109,22 @@ def text2audio():
                 st.write(f"You: {prompt}")
             with st.spinner('Generating audio...'):
                 audio_generation(prompt)
+    def text2speech_module():
+        text_input = st.text_area("Enter text to convert to speech:")
+        language = st.selectbox("Select Language", ("en", "es", "fr", "bn"))
+        if st.button("Generate my speech"):
+            if text_input:
+                tts = gTTS(text=text_input, lang=language)
+                audio_stream = BytesIO()
+                tts.write_to_fp(audio_stream)
+                st.audio(audio_stream, format="audio/wav")
+            else:
+                st.warning("Please enter some text to convert to speech.")
+
+    option = st.sidebar.selectbox("Select an option", ("Text to Speech", "Text to audio"))
+
+    if option != "Text to audio":
+        text2speech_module()
+
+    else:
+        text2audio_module()
