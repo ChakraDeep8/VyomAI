@@ -13,3 +13,4 @@ unstructured[pdf]==0.15.0
 transformers==4.43.3
 sentence-transformers==3.0.1
 nltk==3.8.1
+PyPDF2
