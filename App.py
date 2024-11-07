@@ -4,7 +4,7 @@ from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
-st.set_page_config(page_title="All in one Gemini", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="VyomAI", page_icon="֎", layout="wide")
 with open("style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
