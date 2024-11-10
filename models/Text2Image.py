@@ -6,22 +6,24 @@ def gemini_text2image():
     import google.generativeai as genai
     import os
     import json
+    import pickle
     from datetime import datetime
 
     # Configure the API key directly using Streamlit secrets
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     data_dir = 'data/text2image'
-    history_file_path = os.path.join(data_dir, "chat_history.json")
+    images_dir = os.path.join(data_dir, 'images')
+    history_file_path = os.path.join(data_dir, "history.pkl")
 
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+    # Ensure directories exist
+    os.makedirs(images_dir, exist_ok=True)
 
     # Load previous chat history if it exists
     if 'session_state_history' not in st.session_state:
         if os.path.exists(history_file_path):
-            with open(history_file_path, "r") as f:
-                st.session_state.session_state_history = json.load(f)
+            with open(history_file_path, "rb") as f:
+                st.session_state.session_state_history = pickle.load(f)
         else:
             st.session_state.session_state_history = []
 
@@ -36,6 +38,9 @@ def gemini_text2image():
         st.session_state.session_state_history = []
         if os.path.exists(history_file_path):
             os.remove(history_file_path)
+        for filename in os.listdir(images_dir):
+            file_path = os.path.join(images_dir, filename)
+            os.remove(file_path)
 
     # Function to generate a prompt using Google's Generative AI
     def generate_prompt(user_input, variant):
@@ -74,19 +79,26 @@ def gemini_text2image():
 
         try:
             image = Image.open(io.BytesIO(image_bytes))
+            # Save image to a file
+            image_filename = f"{current_time}_{len(st.session_state.session_state_history)}.png"
+            image_path = os.path.join(images_dir, image_filename)
+            image.save(image_path)
+            
+            # Append history with image path
             st.session_state.session_state_history.append(
-                {"role": "assistant", "content": f"Generated image based on prompt: {input_prompt}", "image": input_prompt}
+                {"role": "assistant", "content": f"Generated image based on prompt: {input_prompt}", "image": image_path}
             )
             with st.chat_message("assistant"):
-                st.image(image, caption=input_prompt, use_column_width=True)
+                st.image(image, caption=input_prompt, use_container_width=True)
         except (UnidentifiedImageError, IOError) as e:
             error_msg = str(e) if status_code != 200 else "Failed to generate image."
             st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})
             with st.chat_message("assistant"):
                 st.write(error_msg)
-        # Save chat history to file after generating image
-        with open(history_file_path, "w") as f:
-            json.dump(st.session_state.session_state_history, f)
+        
+        # Save chat history with image paths to file
+        with open(history_file_path, "wb") as f:
+            pickle.dump(st.session_state.session_state_history, f)
 
     # Set up the Streamlit page configuration
     st.header("Generate Image From Text 🏞️", divider="rainbow")
@@ -102,8 +114,7 @@ def gemini_text2image():
         with st.chat_message(message["role"]):
             st.write(message["content"])
             if "image" in message:
-                caption = message.get("prompt", "No prompt available")
-                st.image(message["image"], caption=caption, use_column_width=True)
+                st.image(message["image"], caption="Generated Image", use_container_width=True)
 
     # Get user input
     use_prompt_generation = st.sidebar.chat_input("Write key words")
@@ -128,5 +139,5 @@ def gemini_text2image():
             image_generation(prompt)
         
     # Save chat history to file after each message
-    with open(history_file_path, "w") as f:
-        json.dump(st.session_state.session_state_history, f)
+    with open(history_file_path, "wb") as f:
+        pickle.dump(st.session_state.session_state_history, f)

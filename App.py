@@ -15,7 +15,7 @@ def streamlit_menu(example=1):
         with st.sidebar:
             selected = option_menu(
                 menu_title="Chat Menu",  # required
-                options=["Home", "Image", "Pdf", "Text 👉 Image", "Text 👉  Audio", "Audio Spectogram"],  # required
+                options=["Home", "Image", "Pdf", "Text 👉 Image", "Text 👉  Audio", "Audio Spectrogram"],  # required
                 icons=["house", "camera", "envelope", "sunset", "play", "graph-up"],  # optional
                 menu_icon="cast",  # optional
                 default_index=0,  # optional
@@ -70,5 +70,5 @@ if selected == "Text 👉 Image":
     Text2Image.gemini_text2image()
 if selected == "Text 👉  Audio":
     Text2Audio.text2audio()
-if selected == "Audio Spectogram":
+if selected == "Audio Spectrogram":
     AudioSpectrogram.audio_spectrogram()

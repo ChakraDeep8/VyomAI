@@ -7,7 +7,7 @@ from datetime import datetime
 
 def audio_spectrogram():
     # Hugging Face API URL and headers
-    API_URL = "https://api-inference.huggingface.co/models/MIT/ast-finetuned-audioset-10-10-0.4593"
+    API_URL = st.secrets["AST_API_KEY"]
     headers = {"Authorization": f"Bearer {st.secrets['api_key']}"}
 
     # Directory and history file path setup
