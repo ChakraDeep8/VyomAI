@@ -1,4 +1,6 @@
 streamlit
+gtts
+PyPDF2
 google-generativeai
 python-dotenv==1.0.1
 langchain==0.2.10
@@ -14,6 +16,5 @@ unstructured[pdf]==0.15.0
 transformers==4.43.3
 sentence-transformers==3.0.1
 nltk==3.8.1
-PyPDF2
-gtts
+mtranslate
 pycryptodome
