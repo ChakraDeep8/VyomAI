@@ -104,11 +104,11 @@ def gemini_text2image():
     st.header("Generate Image From Text 🏞️", divider="rainbow")
 
     # Sidebar options
-    st.sidebar.markdown("Use this option to generate descriptive prompt 👇")
 
     if st.sidebar.button('Clear Chat History', on_click=clear_chat_history):
         st.session_state.session_state_history = []
 
+    st.sidebar.markdown("Use this option to generate descriptive prompt 👇")
     # Display existing chat history
     for message in st.session_state.session_state_history:
         with st.chat_message(message["role"]):

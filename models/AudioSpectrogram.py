@@ -67,7 +67,7 @@ def audio_spectrogram():
             pickle.dump(st.session_state.session_history, f)
 
     # UI setup
-    st.title("Audio Spectrogram Analysis 🎶")
+    st.header("Audio Spectrogram Analysis 🎶", divider="rainbow")
     st.sidebar.button("Clear Chat History", on_click=clear_chat_history)
 
     # Sidebar for file upload

@@ -6,9 +6,11 @@ from groq import Groq
 from datetime import datetime
 from dotenv import load_dotenv
 
+
 def chat_groq():
     load_dotenv()
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
     def icon(emoji: str):
         """Shows an emoji as a Notion-style page icon."""
         st.write(
@@ -21,7 +23,9 @@ def chat_groq():
     os.makedirs(data_dir, exist_ok=True)
     history_file = os.path.join(data_dir, 'past_chats.pkl')
 
-    # Initialize session state attributes
+    # Unique session initialization to avoid shared state across sessions
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if "messages" not in st.session_state:
         st.session_state.messages = []
     if "current_time" not in st.session_state:
@@ -43,29 +47,46 @@ def chat_groq():
     models = {
         "gemma-7b-it": {"name": "Gemma-7b-it", "tokens": 8192, "developer": "Google"},
         "Gemma2-9b-it": {"name": "Gemma2-9b-it", "tokens": 8192, "developer": "Google"},
-        "LLaMA3-70b": {"name": "llama3-70b-8192", "tokens": 8192, "developer": "Meta"},
         "mixtral-8x7b-32768": {"name": "Mixtral-8x7b-Instruct-v0.1", "tokens": 32768, "developer": "Mistral"},
     }
 
     # Sidebar options for new and previous chats
     with st.sidebar:
         if st.button("New Chat"):
-            st.session_state.current_time = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+            st.session_state.current_time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
             st.session_state.messages = []
-            past_chats[st.session_state.current_time] = f"{st.session_state.current_time}"
+            past_chats[st.session_state.current_time] = st.session_state.current_time
             joblib.dump(past_chats, history_file)
+            select = os.path.join(data_dir, f"{past_chats}-messages.pkl")
+            if os.path.exists(select):
+                st.session_state.messages = joblib.load(select)
+            else:
+                st.session_state.messages = []
 
         st.write("## Previous Chats")
         selected_chat = st.selectbox("Choose a chat", list(past_chats.keys()), format_func=lambda x: past_chats[x])
 
-    # Load selected chat history if it exists
-    if selected_chat:
-        chat_file = os.path.join(data_dir, f"{selected_chat}-messages.pkl")
-        if os.path.exists(chat_file):
-            st.session_state.messages = joblib.load(chat_file)
-        else:
+        # Load selected chat history only if it exists
+        if selected_chat:
+            chat_file = os.path.join(data_dir, f"{selected_chat}-messages.pkl")
+            if os.path.exists(chat_file):
+                st.session_state.messages = joblib.load(chat_file)
+            else:
+                st.session_state.messages = []
+        if st.button('Delete All Chats'):
+            for chat_id in list(past_chats.keys()):
+                st_messages_file = os.path.join(data_dir, f'{chat_id}-st_messages')
+                gemini_messages_file = os.path.join(data_dir, f'{chat_id}-gemini_messages')
+                if os.path.exists(st_messages_file):
+                    os.remove(st_messages_file)
+                if os.path.exists(gemini_messages_file):
+                    os.remove(gemini_messages_file)
+            past_chats.clear()
+            joblib.dump(past_chats, history_file)
             st.session_state.messages = []
-
+            st.session_state.gemini_history = []
+            st.session_state.current_time = None
+            st.rerun()
     # Model selection and tokens slider
     col1, col2 = st.columns(2)
     with col1:
@@ -73,7 +94,7 @@ def chat_groq():
             "Choose a model:",
             options=list(models.keys()),
             format_func=lambda x: models[x]["name"],
-            index=3  # Default to mixtral
+            index=2  # Default to mixtral
         )
 
     if st.session_state.selected_model != model_option:

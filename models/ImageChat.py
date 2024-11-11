@@ -43,7 +43,7 @@ def gemini_image_chat():
 
     # Sidebar allows a list of past chats and new chat button
     with st.sidebar:
-        st.write('# Previous Chats 👇')
+
 
         # Handle "New Chat" button separately
         if st.button('New Chat'):
@@ -54,7 +54,7 @@ def gemini_image_chat():
             past_chats[st.session_state.current_time] = st.session_state.chat_title
             joblib.dump(past_chats, past_chats_file)
             st.rerun()
-
+        st.write('# Previous Chats 👇')
         # Display past chats as a dropdown
         if st.session_state.get('current_time') is None:
             st.session_state.current_time = st.selectbox(
