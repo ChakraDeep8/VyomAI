@@ -1,13 +1,17 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio, AudioSpectrogram, qr_generator
+from PIL import Image
+
+logo = Image.open("models/res/logo.png")
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
-st.set_page_config(page_title="VyomAI", page_icon="֎", layout="wide")
+st.set_page_config(page_title="VyomAI", page_icon=logo, layout="wide")
 with open("style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
-
+with st.sidebar:
+    st.image("models/res/yom.png")
 
 def streamlit_menu(example=1):
     if example == 1:
