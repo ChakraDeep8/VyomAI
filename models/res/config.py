@@ -1,6 +1,7 @@
 import qrcode.image.styles.moduledrawers.pil as mods
 from qrcode.image.styles.moduledrawers import svg as svg_drawers
 
+
 mods_dict = {
     'png': {
 

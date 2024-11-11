@@ -7,6 +7,7 @@ from models.res.utils import hex_to_rgb
 from models.res.utils import setup_qrcode
 from models.res.config import mods_dict
 
+
 def QR():
     if not 'img' in st.session_state:
         st.session_state.img = ''

@@ -4,9 +4,7 @@ import qrcode
 from qrcode.image.styledpil import StyledPilImage
 import qrcode.image.styles.colormasks as masks
 import qrcode.image.svg as svg
-
 from models.res.config import mods_dict
-
 
 def hex_to_rgb(hex):
     hex = hex.lstrip('#')
@@ -17,7 +15,6 @@ def image_to_bytes(img):
     bio = BytesIO()
     img.save(bio, format='PNG')
     return bio.getvalue()
-
 
 def setup_qrcode(text, dict_format, format, color, resolution, modStyle):
     # Construct the QR Code according to the parameters selected by user

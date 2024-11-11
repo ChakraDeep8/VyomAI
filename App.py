@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio, AudioSpectrogram
+from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio, AudioSpectrogram, qr_generator
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
@@ -15,8 +15,8 @@ def streamlit_menu(example=1):
         with st.sidebar:
             selected = option_menu(
                 menu_title="Chat Menu",  # required
-                options=["Home", "Image", "Pdf", "Text 👉 Image", "Text 👉  Audio", "Audio Spectrogram"],  # required
-                icons=["house", "camera", "envelope", "sunset", "play", "graph-up"],  # optional
+                options=["Home", "Image", "Pdf", "Text 👉 Image", "Text 👉  Audio", "Audio Spectrogram", "QR Generator"],  # required
+                icons=["house", "camera", "envelope", "sunset", "play", "graph-up", "box"],  # optional
                 menu_icon="cast",  # optional
                 default_index=0,  # optional
             )
@@ -72,3 +72,5 @@ if selected == "Text 👉  Audio":
     Text2Audio.text2audio()
 if selected == "Audio Spectrogram":
     AudioSpectrogram.audio_spectrogram()
+if selected == "QR Generator":
+    qr_generator.QR()
