@@ -1,9 +1,11 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio, AudioSpectrogram, qr_generator
+from models import GroqChat, ImageChat, PdfChat, Text2Image, Text2Audio, AudioSpectrogram, qr_generator, res
 from PIL import Image
+import os
 
-logo = Image.open("models/res/logo.png")
+path = os.path.join("models/res", "logo.png")
+logo = Image.open(path)
 
 # 1=sidebar menu, 2=horizontal menu, 3=horizontal menu w/ custom menu
 EXAMPLE_NO = 1
