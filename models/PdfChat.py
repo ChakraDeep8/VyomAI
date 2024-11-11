@@ -69,7 +69,7 @@ def gemini_pdf_chat():
 
         chain = get_conversational_chain()
 
-        response = chain(
+        response = chain.invoke(
             {"input_documents": docs, "question": user_question}
             , return_only_outputs=True)
         return response
