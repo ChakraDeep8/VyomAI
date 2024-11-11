@@ -1,12 +1,12 @@
 import streamlit as st
-from gtts import gTTS
+from gtts import gTTS, langs
 from io import BytesIO
+import os
+import json
 import requests
-import pandas as pd
 from groq import Groq
 from typing import Generator
-from googletrans import Translator
-from models.res.laguages import *
+from mtranslate import translate
 
 def text2audio():
     def text2audio_module():
@@ -51,7 +51,8 @@ def text2audio():
                     )
                     with st.chat_message("assistant"):
                         st.audio(audio_stream, format="audio/wav")
-                        btn = st.download_button(label="Download",data=audio_stream,file_name="audio.wav",mime="audio/wav")
+                        btn = st.download_button(label="Download", data=audio_stream, file_name="audio.wav",
+                                                 mime="audio/wav")
                 except IOError as e:
                     error_msg = f"IOError: {str(e)}"
                     st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})
@@ -113,40 +114,41 @@ def text2audio():
                 st.write(f"You: {prompt}")
             with st.spinner('Generating audio...'):
                 audio_generation(prompt)
-    def text2speech_module():
-        # Load languages dynamically from language dataset
-        df = pd.read_excel(os.path.join('data', 'language.xlsx'), sheet_name='wiki')
-        df.dropna(inplace=True)
-        lang = df['name'].to_list()
-        langcode = df['iso'].to_list()
-        lang_array = {lang[i]: langcode[i] for i in range(len(langcode))}
 
-        st.title("Language Translation + Text-to-Speech")
-        st.markdown("Translate text to a selected language and generate speech in that language if supported.")
+    def text2speech_module():
+        # Load languages dynamically from the JSON file
+        languages_path = os.path.join('models', 'res', 'languages.json')
+        with open(languages_path, 'r') as file:
+            data = json.load(file)
+
+        lang_array = {item['name']: item['iso'] for item in data['languages']}
+
+        st.header("Language Translation", divider="rainbow")
+        st.markdown("Translate text to a selected language and generate speech")
 
         # User input for translation and TTS
         input_text = st.text_area("Enter text to translate and convert to speech:", height=150)
-        target_language = st.selectbox("Select target language:", lang)
+        target_language = st.selectbox("Select target language:", list(lang_array.keys()))
 
         if st.button("Translate & Generate Speech"):
             if input_text:
                 # Translation
-                translator = Translator()
-                translation = translator.translate(input_text, dest=lang_array[target_language]).text
+                translation = translate(input_text, lang_array[target_language])
                 st.text_area("Translated Text", translation, height=150)
 
                 # Text-to-Speech
-                if lang_array[target_language] in gTTS.LANGUAGES:
+                if lang_array[target_language] in langs._langs:  # Check if language is supported by gTTS
                     audio_stream = BytesIO()
                     tts = gTTS(text=translation, lang=lang_array[target_language])
                     tts.write_to_fp(audio_stream)
                     audio_stream.seek(0)
-                    
+
                     # Display audio player
                     st.audio(audio_stream, format="audio/wav")
-                    
+
                     # Download option
-                    st.download_button(label="Download Audio", data=audio_stream, file_name="translated_speech.wav", mime="audio/wav")
+                    st.download_button(label="Download Audio", data=audio_stream, file_name="translated_speech.wav",
+                                       mime="audio/wav")
                 else:
                     st.warning("Text-to-Speech is not supported in the selected language.")
             else:
@@ -156,6 +158,5 @@ def text2audio():
 
     if option != "Text to audio":
         text2speech_module()
-
     else:
         text2audio_module()
