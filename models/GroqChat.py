@@ -19,7 +19,7 @@ def chat_groq():
         )
 
     # Define user and directory paths
-    username = st.session_state.get('username', 'default_user')
+    username = st.session_state['username']
     base_chat_dir = os.path.join("DataHistory", username, "Chat")  # Updated path here
     os.makedirs(base_chat_dir, exist_ok=True)
     history_file = os.path.join(base_chat_dir, 'past_chats.pkl')
