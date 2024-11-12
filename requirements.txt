@@ -20,3 +20,4 @@ sentence-transformers==3.0.1
 nltk==3.8.1
 mtranslate
 pycryptodome
+bcrypt
