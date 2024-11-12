@@ -5,7 +5,7 @@ from typing import Generator
 from groq import Groq
 from datetime import datetime
 from dotenv import load_dotenv
-
+import shutil
 
 def chat_groq():
     load_dotenv()
@@ -18,12 +18,13 @@ def chat_groq():
             unsafe_allow_html=True,
         )
 
-    # Directory for chat history
-    data_dir = 'History/Chat'
-    os.makedirs(data_dir, exist_ok=True)
-    history_file = os.path.join(data_dir, 'past_chats.pkl')
+    # Define user and directory paths
+    username = st.session_state.get('username', 'default_user')
+    base_chat_dir = os.path.join("DataHistory", username, "Chat")  # Updated path here
+    os.makedirs(base_chat_dir, exist_ok=True)
+    history_file = os.path.join(base_chat_dir, 'past_chats.pkl')
 
-    # Unique session initialization to avoid shared state across sessions
+    # Unique session initialization
     if "session_id" not in st.session_state:
         st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if "messages" not in st.session_state:
@@ -34,10 +35,7 @@ def chat_groq():
         st.session_state.selected_model = None
 
     # Load past chats
-    if os.path.exists(history_file):
-        past_chats = joblib.load(history_file)
-    else:
-        past_chats = {}
+    past_chats = joblib.load(history_file) if os.path.exists(history_file) else {}
 
     icon("🗪")
     st.subheader("Chat App", divider="rainbow", anchor=False)
@@ -53,40 +51,35 @@ def chat_groq():
     # Sidebar options for new and previous chats
     with st.sidebar:
         if st.button("New Chat"):
-            st.session_state.current_time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+            st.session_state.current_time = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+            chat_dir = os.path.join(base_chat_dir, st.session_state.current_time)
+            os.makedirs(chat_dir, exist_ok=True)
             st.session_state.messages = []
             past_chats[st.session_state.current_time] = st.session_state.current_time
             joblib.dump(past_chats, history_file)
-            select = os.path.join(data_dir, f"{past_chats}-messages.pkl")
-            if os.path.exists(select):
-                st.session_state.messages = joblib.load(select)
-            else:
-                st.session_state.messages = []
 
         st.write("## Previous Chats")
         selected_chat = st.selectbox("Choose a chat", list(past_chats.keys()), format_func=lambda x: past_chats[x])
 
         # Load selected chat history only if it exists
         if selected_chat:
-            chat_file = os.path.join(data_dir, f"{selected_chat}-messages.pkl")
+            chat_file = os.path.join(base_chat_dir, selected_chat, "messages.pkl")
             if os.path.exists(chat_file):
                 st.session_state.messages = joblib.load(chat_file)
             else:
                 st.session_state.messages = []
+
         if st.button('Delete All Chats'):
             for chat_id in list(past_chats.keys()):
-                st_messages_file = os.path.join(data_dir, f'{chat_id}-st_messages')
-                gemini_messages_file = os.path.join(data_dir, f'{chat_id}-gemini_messages')
-                if os.path.exists(st_messages_file):
-                    os.remove(st_messages_file)
-                if os.path.exists(gemini_messages_file):
-                    os.remove(gemini_messages_file)
+                chat_dir = os.path.join(base_chat_dir, chat_id)
+                if os.path.exists(chat_dir):
+                    shutil.rmtree(chat_dir)
             past_chats.clear()
             joblib.dump(past_chats, history_file)
             st.session_state.messages = []
-            st.session_state.gemini_history = []
             st.session_state.current_time = None
             st.rerun()
+
     # Model selection and tokens slider
     col1, col2 = st.columns(2)
     with col1:
@@ -94,7 +87,7 @@ def chat_groq():
             "Choose a model:",
             options=list(models.keys()),
             format_func=lambda x: models[x]["name"],
-            index=2  # Default to mixtral
+            index=2
         )
 
     if st.session_state.selected_model != model_option:
@@ -112,7 +105,7 @@ def chat_groq():
             help=f"Adjust max tokens for response. Max: {max_tokens_range}"
         )
 
-    # Display chat history
+    # Display chat history with avatars
     for message in st.session_state.messages:
         avatar = "🤖" if message["role"] == "assistant" else "👨‍💻"
         with st.chat_message(message["role"], avatar=avatar):
@@ -153,5 +146,8 @@ def chat_groq():
             combined_response = "\n".join(str(item) for item in full_response)
             st.session_state.messages.append({"role": "assistant", "content": combined_response})
 
-        # Save the session messages
-        joblib.dump(st.session_state.messages, os.path.join(data_dir, f"{selected_chat}-messages.pkl"))
+        # Save the session messages only if `current_time` is set
+        if st.session_state.current_time:
+            chat_dir = os.path.join(base_chat_dir, st.session_state.current_time)
+            os.makedirs(chat_dir, exist_ok=True)  # Ensure chat directory exists
+            joblib.dump(st.session_state.messages, os.path.join(chat_dir, "messages.pkl"))

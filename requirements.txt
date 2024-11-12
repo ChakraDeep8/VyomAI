@@ -1,4 +1,5 @@
 streamlit
+streamlit_option_menu
 gtts
 PyPDF2
 google-generativeai

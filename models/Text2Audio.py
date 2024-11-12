@@ -14,9 +14,14 @@ def text2audio():
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         model = "mixtral-8x7b-32768"
 
-        # Initialize session_state_history if it doesn't exist
-        if 'session_state_history' not in st.session_state:
-            st.session_state.session_state_history = []
+        # Ensure directory for user data exists
+        username = st.session_state.get('username', 'default_user')  # Default to 'default_user' if not set
+        user_data_dir = os.path.join("DataHistory", username, "Text2Audio")
+        audio_dir = os.path.join(user_data_dir, "audio")
+        os.makedirs(audio_dir, exist_ok=True)
+
+        # Initialize history list as a local variable instead of session_state
+        history = []
 
         # Function to query the Hugging Face model for audio generation
         def query_meta_audio(prompt, headers):
@@ -29,10 +34,6 @@ def text2audio():
                 st.write(f"Response text: {response.text}")
                 return None, response.status_code
 
-        # Function to clear chat history in the session state
-        def clear_chat_history():
-            st.session_state.session_state_history = []
-
         # Function to generate audio from a prompt
         def audio_generation(input_prompt):
             api_key = st.secrets["api_key"]
@@ -40,27 +41,23 @@ def text2audio():
             audio_bytes, status_code = query_meta_audio(input_prompt, headers)
 
             if audio_bytes:
-                # Save audio to a local file for inspection
-                with open("generated_audio.wav", "wb") as audio_file:
+                # Save audio to a local file
+                audio_filename = f"{len(history)}_{username}_{input_prompt[:10]}.wav"
+                audio_path = os.path.join(audio_dir, audio_filename)
+                with open(audio_path, "wb") as audio_file:
                     audio_file.write(audio_bytes)
 
-                try:
-                    audio_stream = BytesIO(audio_bytes)  # Convert bytes to an audio stream
-                    st.session_state.session_state_history.append(
-                        {"role": "assistant", "content": f"Generated audio based on prompt: {input_prompt}"}
-                    )
-                    with st.chat_message("assistant"):
-                        st.audio(audio_stream, format="audio/wav")
-                        btn = st.download_button(label="Download", data=audio_stream, file_name="audio.wav",
-                                                 mime="audio/wav")
-                except IOError as e:
-                    error_msg = f"IOError: {str(e)}"
-                    st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})
-                    with st.chat_message("assistant"):
-                        st.write(error_msg)
+                # Store audio history entry
+                history.append({"role": "assistant", "content": f"Generated audio based on prompt: {input_prompt}", "audio": audio_filename})
+
+                # Display audio and download link
+                audio_stream = BytesIO(audio_bytes)
+                with st.chat_message("assistant"):
+                    st.audio(audio_stream, format="audio/wav")
+                    st.download_button(label="Download Audio", data=audio_stream, file_name=audio_filename, mime="audio/wav")
             else:
                 error_msg = "Failed to generate audio - empty response."
-                st.session_state.session_state_history.append({"role": "assistant", "content": error_msg})
+                history.append({"role": "assistant", "content": error_msg})
                 with st.chat_message("assistant"):
                     st.write(error_msg)
 
@@ -79,37 +76,38 @@ def text2audio():
         st.sidebar.markdown("Use this option to generate descriptive prompt 👇")
         if prompt := st.sidebar.chat_input("Enter keyword for audio prompt..."):
             descriptive_prompt = template(prompt)
-            st.session_state.session_state_history.append({"role": "user", "content": descriptive_prompt})
+            history.append({"role": "user", "content": descriptive_prompt})
 
             # Generate a descriptive prompt using Groq
             try:
                 chat_completion = client.chat.completions.create(
                     model=model,
-                    messages=[{"role": m["role"], "content": m["content"]} for m in
-                              st.session_state.session_state_history],
+                    messages=[{"role": m["role"], "content": m["content"]} for m in history],
                     max_tokens=100,
                     stream=True
                 )
                 chat_responses_generator = generate_chat_responses(chat_completion)
                 full_response = "".join(list(chat_responses_generator))
                 st.sidebar.write("Generated Prompt:", full_response)
-                st.session_state.session_state_history.append({"role": "assistant", "content": full_response})
+                history.append({"role": "assistant", "content": full_response})
             except Exception as e:
                 st.error(f"Error generating prompt with Groq: {e}")
 
         # Option to clear chat history
-        if st.sidebar.button('Clear Chat History', on_click=clear_chat_history):
-            st.session_state.session_state_history = []
+        if st.sidebar.button('Clear Chat History'):
+            history.clear()
 
         # Display existing chat history
-        for message in st.session_state.session_state_history:
+        for message in history:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
+                if "audio" in message:
+                    st.audio(os.path.join(audio_dir, message["audio"]), format="audio/wav")
 
         # Get user input and generate audio if a prompt is provided
         prompt = st.chat_input("Describe the audio you want")
         if prompt:
-            st.session_state.session_state_history.append({"role": "user", "content": prompt})
+            history.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(f"You: {prompt}")
             with st.spinner('Generating audio...'):
@@ -160,3 +158,4 @@ def text2audio():
         text2speech_module()
     else:
         text2audio_module()
+
