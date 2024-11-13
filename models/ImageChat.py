@@ -34,7 +34,7 @@ def gemini_image_chat():
 
     AI_AVATAR_ICON = '✨'
 
-    st.header("Chat with Image using Gemini🖼️")
+    st.header("Chat with Image using Gemini🖼️", divider="rainbow")
 
     # Display chat history for the current session
     for msg in st.session_state.imagechat_messages[unique_chat_id]:

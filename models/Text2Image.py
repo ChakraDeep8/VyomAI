@@ -82,10 +82,6 @@ def gemini_text2image():
     # Set up the Streamlit page configuration
     st.header("Generate Image From Text 🏞️", divider="rainbow")
 
-    # Sidebar options
-    if st.sidebar.button('Clear Chat History'):
-        st.session_state['history'] = []
-
     st.sidebar.markdown("Use this option to generate descriptive prompt 👇")
 
     # Display existing chat history

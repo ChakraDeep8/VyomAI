@@ -49,7 +49,7 @@ def audio_spectrogram():
         st.session_state.session_history.append(audio_data)
 
     # UI setup
-    st.header("Audio Spectrogram Analysis 🎶")
+    st.header("Audio Spectrogram Analysis 🎶",divider="rainbow")
     st.sidebar.button("Clear Chat History", on_click=clear_chat_history)
 
     # Sidebar for file upload
@@ -62,8 +62,7 @@ def audio_spectrogram():
     audio_value = st.audio_input("Record a voice message")
 
     # Handle the recorded audio input
-    if audio_value:
-        st.audio(audio_value, format="audio/wav")  # Play the recorded audio
+    if audio_value:  # Play the recorded audio
         st.write("Analyzing recorded audio...")
 
         # Generate unique filename for the recorded audio

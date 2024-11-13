@@ -29,9 +29,8 @@ def chat_groq():
         st.session_state.messages = []
     if "selected_model" not in st.session_state:
         st.session_state.selected_model = None
-
-    icon("🗪")
-    st.subheader("Chat App", divider="rainbow", anchor=False)
+  
+    st.header("Chat App 🗪", divider="rainbow", anchor=False)
     st.markdown("**Powered by Groq**")
 
     # Define available models

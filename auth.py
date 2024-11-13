@@ -67,7 +67,7 @@ def login():
     username = st.text_input("Username", key="login_username", help="Enter your username")
     password = st.text_input("Password", type="password", key="login_password", help="Enter your password")
 
-    if st.button("Login"):
+    if st.button("Login") or password:
         if username and password:
             if username in config["credentials"]["usernames"]:
                 stored_password = config["credentials"]["usernames"][username]["password"]

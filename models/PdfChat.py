@@ -111,7 +111,6 @@ def gemini_pdf_chat():
                 st.session_state[chat_history_key].append({"sender": "assistant", "content": response_text})
 
     with st.sidebar:
-        st.title("Menu:")
         if st.button("Submit & Process"):
             with st.spinner("Processing..."):
                 raw_text = get_pdf_text(pdf_docs)
