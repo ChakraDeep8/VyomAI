@@ -1,38 +1,30 @@
 import streamlit as st
 import requests
-import os
-import pickle
 import pandas as pd
 from datetime import datetime
+import uuid
 
 
 def audio_spectrogram():
-    # Hugging Face API URL and headers
-    API_URL = st.secrets["AST_API_KEY"]
-    headers = {"Authorization": f"Bearer {st.secrets['api_key']}"}
+    # Ensure user is logged in
+    if 'username' not in st.session_state:
+        st.error("You must log in to access this feature.")
+        return
 
-    # Directory and history file path setup
-    data_dir = 'data/audio_spectrogram'
-    audio_dir = os.path.join(data_dir, 'audio_files')  # Folder to save audio files
-    history_file_path = os.path.join(data_dir, "audio_history.json")
-    pickle_file_path = os.path.join(data_dir, "audio_history.pkl")
+    # Generate a unique user ID if it doesn't exist
+    if 'user_id' not in st.session_state:
+        # Generate a UUID for the session, combining it with the username
+        st.session_state.user_id = f"{st.session_state['username']}_{uuid.uuid4()}"
 
-    # Ensure directories exist
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    if not os.path.exists(audio_dir):
-        os.makedirs(audio_dir)
-
-    # Load chat history (from pickle if available)
+    # Initialize session history if not already done
     if 'session_history' not in st.session_state:
         st.session_state.session_history = []
-        if os.path.exists(pickle_file_path):
-            with open(pickle_file_path, "rb") as f:
-                st.session_state.session_history = pickle.load(f)
 
     # Function to query the Hugging Face model
     def query_audio_model(audio_data):
         try:
+            API_URL = st.secrets["AST_API_KEY"]
+            headers = {"Authorization": f"Bearer {st.secrets['api_key']}"}
             response = requests.post(API_URL, headers=headers, data=audio_data)
             response.raise_for_status()
             return response.json()
@@ -42,16 +34,10 @@ def audio_spectrogram():
 
     # Function to clear chat history
     def clear_chat_history():
-        # Clear session state history
         st.session_state.session_history = []
-
-        # Remove pickle file to clear saved history
-        if os.path.exists(pickle_file_path):
-            os.remove(pickle_file_path)
-
         st.success("Chat history cleared!")
 
-    # Function to save audio data and predictions to pickle
+    # Function to save audio data and predictions to session history
     def save_audio_data(audio_filename, predictions, confidences):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         audio_data = {
@@ -60,20 +46,16 @@ def audio_spectrogram():
             "confidences": confidences,
             "timestamp": timestamp
         }
-        # Append to session history
         st.session_state.session_history.append(audio_data)
 
-        # Save session history to pickle
-        with open(pickle_file_path, "wb") as f:
-            pickle.dump(st.session_state.session_history, f)
-
     # UI setup
-    st.header("Audio Spectrogram Analysis 🎶", divider="rainbow")
+    st.header("Audio Spectrogram Analysis 🎶")
     st.sidebar.button("Clear Chat History", on_click=clear_chat_history)
 
     # Sidebar for file upload
     st.sidebar.header("Upload Audio")
-    uploaded_audio_file = st.sidebar.file_uploader("Upload an audio file (.wav, .mp3, .flac)", type=["wav", "mp3", "flac"])
+    uploaded_audio_file = st.sidebar.file_uploader("Upload an audio file (.wav, .mp3, .flac)",
+                                                   type=["wav", "mp3", "flac"])
 
     # Audio Input using st.audio_input (for direct recording)
     st.write("Record a voice message 🎤")
@@ -87,11 +69,6 @@ def audio_spectrogram():
         # Generate unique filename for the recorded audio
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         audio_filename = f"audio_{timestamp}.wav"
-        audio_filepath = os.path.join(audio_dir, audio_filename)
-
-        # Save the recorded audio as a file
-        with open(audio_filepath, "wb") as f:
-            f.write(audio_value.getvalue())  # Use getvalue() to retrieve bytes
 
         # Analyze audio using Hugging Face model
         with st.spinner("Analyzing audio..."):
@@ -99,14 +76,8 @@ def audio_spectrogram():
 
         # Handle and display results
         if result:
-            if isinstance(result, list):
-                predictions = [entry.get("label") for entry in result]
-                confidences = [entry.get("score") for entry in result]
-            else:
-                predictions = []
-                confidences = []
-
-            # Save audio data, predictions, and confidences as pkl
+            predictions = [entry.get("label") for entry in result] if isinstance(result, list) else []
+            confidences = [entry.get("score") for entry in result] if isinstance(result, list) else []
             save_audio_data(audio_filename, predictions, confidences)
 
             st.write("Audio analysis result:")
@@ -124,11 +95,6 @@ def audio_spectrogram():
         # Generate unique filename for the uploaded audio
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         audio_filename = f"audio_{timestamp}.mp3"
-        audio_filepath = os.path.join(audio_dir, audio_filename)
-
-        # Save the uploaded audio file
-        with open(audio_filepath, "wb") as f:
-            f.write(audio_data)  # Save the uploaded audio as bytes
 
         # Analyze audio using Hugging Face model
         with st.spinner("Analyzing uploaded audio..."):
@@ -136,14 +102,8 @@ def audio_spectrogram():
 
         # Handle and display results
         if result:
-            if isinstance(result, list):
-                predictions = [entry.get("label") for entry in result]
-                confidences = [entry.get("score") for entry in result]
-            else:
-                predictions = []
-                confidences = []
-
-            # Save audio data, predictions, and confidences as pkl
+            predictions = [entry.get("label") for entry in result] if isinstance(result, list) else []
+            confidences = [entry.get("score") for entry in result] if isinstance(result, list) else []
             save_audio_data(audio_filename, predictions, confidences)
 
             st.write("Audio analysis result:")
@@ -153,26 +113,17 @@ def audio_spectrogram():
         else:
             st.write("Failed to analyze audio.")
 
-    # Display chat history in tabular format (if needed)
+    # Display chat history in tabular format
     st.write("### Chat History")
     if st.session_state.session_history:
-        # Convert session history to a pandas DataFrame for tabular display
         chat_data = []
         for message in st.session_state.session_history:
-            if "audio_filename" in message:
-                chat_data.append({
-                    "Audio Filename": message['audio_filename'],
-                    "Timestamp": message['timestamp'],
-                    "Predictions": message['predictions'],
-                    "Confidence": message['confidences']
-                })
-            else:
-                chat_data.append({
-                    "Role": message['role'],
-                    "Content": message['content'],
-                    "Output": message.get('output', 'N/A')
-                })
-        
-        # Create a DataFrame and display it as a table
+            chat_data.append({
+                "Audio Filename": message['audio_filename'],
+                "Timestamp": message['timestamp'],
+                "Predictions": message['predictions'],
+                "Confidence": message['confidences']
+            })
+
         chat_df = pd.DataFrame(chat_data)
         st.table(chat_df)

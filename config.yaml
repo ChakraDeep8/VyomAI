@@ -9,21 +9,29 @@ credentials:
       name: admin
       password: $2b$12$jpyxlmYQweHrEIFZU5SMA.HhCqciXFtzx1qVTGSP2cemVLyncqPky
     ankit:
-      email: ankit@hp.in
-      name: ankit
-      password: $2b$12$mlRifaJnH8jfZtD6OcaqKOAMOXwewl0AiYbME3veqh9ExQfpqkl2S
+      email: ankit@pura.tha
+      name: Ankit Purakayastha
+      password: $2b$12$wOUgeOGsUp1ng1Rv2dxyBuJq5Dq.Ip5/GvUvR.etsUwlbtvBXfsrC
     deep:
-      email: dd@cc
+      email: deep@chakra.ty
       name: Deep Chakraborty
-      password: $2b$12$uDqfxNgAw..o3VocwHXQWObcfLnmR8sOuEVkcMD4aogtNo4Qwea5e
+      password: $2b$12$/vTGSEogNY0iDNbs5WI8D.Wm0au/kEOfiVp7PtvQLH3OrMmi5KgB2
     dip:
       email: diptanshu@cha.khache
       name: Diptanshu Ghosh
       password: $2b$12$BB8.ENv1yr4adQ6/enqyReB8.q6r4XPxRdOhb1.qe4zKZy5VoYJf2
+    paro:
+      email: paro@chakra.ty
+      name: Paromita Chakraborty
+      password: $2b$12$IjAnmnQFblsYgGnInvDNr.AQ65Z49GB7.rc4fOKeNhrhtlgvk76XS
     shubh:
       email: shubhamgupta15m@gmail.com
       name: Shubham Gupta
       password: $2b$12$i8mz1.ISAcjgvHLFUE4EB.cv/yW0IqNoAwbTNvizF3MAdFFVs9NRS
+    suman:
+      email: suman@mitr.a
+      name: Suman Mitra
+      password: $2b$12$zgXQeztPddufhghQw0MmROQ3PF03zbQGOHqMguNbnms5EED/6xlba
     user:
       email: user@example.com
       name: user
