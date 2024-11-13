@@ -50,7 +50,7 @@ def audio_spectrogram():
 
     # UI setup
     st.header("Audio Spectrogram Analysis 🎶",divider="rainbow")
-    st.sidebar.button("Clear Chat History", on_click=clear_chat_history)
+    #st.sidebar.button("Clear Chat History", on_click=clear_chat_history)
 
     # Sidebar for file upload
     st.sidebar.header("Upload Audio")
