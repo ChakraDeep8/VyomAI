@@ -66,7 +66,7 @@ def gemini_text2image():
             image = Image.open(io.BytesIO(image_bytes))
             # Display image directly in Streamlit
             with st.chat_message("assistant"):
-                st.image(image, caption=input_prompt, use_container_width=True)
+                st.image(image, caption=input_prompt, width=200)
 
             # Append history with image
             st.session_state['history'].append(
