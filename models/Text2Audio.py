@@ -8,6 +8,7 @@ from groq import Groq
 from typing import Generator
 from mtranslate import translate
 
+
 def text2audio():
     def text2audio_module():
         # Initialize Groq client

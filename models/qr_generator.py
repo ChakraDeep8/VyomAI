@@ -20,7 +20,6 @@ def QR():
         text = st.text_input("Enter you link", key='content')
 
         c11, c12 = st.columns(2)
-
         with c11:
             color = st.color_picker("Pick a color", "#000000", key='color_picker')
         with c12:

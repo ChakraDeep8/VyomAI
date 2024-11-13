@@ -9,12 +9,12 @@ def chat_groq():
     load_dotenv()
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-    def icon(emoji: str):
-        """Shows an emoji as a Notion-style page icon."""
-        st.write(
-            f'<span style="font-size: 78px; line-height: 1">{emoji}</span>',
-            unsafe_allow_html=True,
-        )
+    # def icon(emoji: str):
+    #     """Shows an emoji as a Notion-style page icon."""
+    #     st.write(
+    #         f'<span style="font-size: 78px; line-height: 1">{emoji}</span>',
+    #         unsafe_allow_html=True,
+    #     )
 
     # Initialize session state for username and unique user ID
     if "username" not in st.session_state:

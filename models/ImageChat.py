@@ -4,7 +4,6 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from datetime import datetime
 
-
 def gemini_image_chat():
     load_dotenv()
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])

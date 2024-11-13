@@ -93,15 +93,13 @@ if st.session_state.logged_in:
     if selected == "QR Generator":
         qr_generator.QR()
 
-    col1, col2 = st.sidebar.columns(2)
-    with col1:
-        refresh = st.sidebar.button("Refresh🔃")
-        if refresh:
-            st.rerun()
-    # Logout option
-    with col2:
-        lg_out = st.sidebar.button("Logout")
-        if lg_out:
+
+    refresh = st.sidebar.button("Refresh🔃")
+    if refresh:
+        st.rerun()
+
+    lg_out = st.sidebar.button("Logout")
+    if lg_out:
             auth.logout()
 
 else:

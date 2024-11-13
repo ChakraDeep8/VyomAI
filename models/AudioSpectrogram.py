@@ -56,7 +56,6 @@ def audio_spectrogram():
     st.sidebar.header("Upload Audio")
     uploaded_audio_file = st.sidebar.file_uploader("Upload an audio file (.wav, .mp3, .flac)",
                                                    type=["wav", "mp3", "flac"])
-
     # Audio Input using st.audio_input (for direct recording)
     st.write("Record a voice message 🎤")
     audio_value = st.audio_input("Record a voice message")

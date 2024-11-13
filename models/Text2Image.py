@@ -90,7 +90,6 @@ def gemini_text2image():
             st.write(message["content"])
             if "image" in message:
                 st.image(Image.open(io.BytesIO(message["image"])), caption="Generated Image", use_container_width=True)
-
     # Get user input
     use_prompt_generation = st.sidebar.chat_input("Write key words")
     variant = st.sidebar.selectbox("Select image variant",

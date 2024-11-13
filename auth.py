@@ -34,7 +34,7 @@ def signup():
     new_username = st.text_input("Enter Username", key="username", help="Your desired username")
     new_password = st.text_input("Enter Password", type="password", key="password", help="Your password")
 
-    if st.button("Register"):
+    if st.button("Register") or new_password:
         if new_name and new_email and new_username and new_password:
             # Hash the password
             hashed_password = hash_password(new_password)
