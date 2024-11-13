@@ -5,45 +5,23 @@ import pickle
 import pandas as pd
 from datetime import datetime
 
+
 def audio_spectrogram():
-    # Check if the user is logged in
-    if 'username' not in st.session_state:
-        st.error("You must log in to access this feature.")
-        return
-
-    # Helper function to get user-specific directory
-    def get_user_data_directory():
-        username = st.session_state['username']
-        if username:
-            user_data_dir = os.path.join("DataHistory", username, "AudioSpectrogram")
-            if not os.path.exists(user_data_dir):
-                try:
-                    os.makedirs(user_data_dir)
-                except Exception as e:
-                    st.error(f"Error creating directory: {e}")
-                    return None
-            return user_data_dir
-        return None
-
-    # Get user-specific data directory
-    user_data_dir = get_user_data_directory()
-    
-    if user_data_dir is None:
-        st.error("Failed to create or access the user data directory.")
-        return
+    # Hugging Face API URL and headers
+    API_URL = st.secrets["AST_API_KEY"]
+    headers = {"Authorization": f"Bearer {st.secrets['api_key']}"}
 
     # Directory and history file path setup
-    audio_dir = os.path.join(user_data_dir, 'audio_files')  # Folder to save audio files
-    history_file_path = os.path.join(user_data_dir, "audio_history.json")
-    pickle_file_path = os.path.join(user_data_dir, "audio_history.pkl")
+    data_dir = 'data/audio_spectrogram'
+    audio_dir = os.path.join(data_dir, 'audio_files')  # Folder to save audio files
+    history_file_path = os.path.join(data_dir, "audio_history.json")
+    pickle_file_path = os.path.join(data_dir, "audio_history.pkl")
 
     # Ensure directories exist
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
     if not os.path.exists(audio_dir):
-        try:
-            os.makedirs(audio_dir)
-        except Exception as e:
-            st.error(f"Error creating audio directory: {e}")
-            return
+        os.makedirs(audio_dir)
 
     # Load chat history (from pickle if available)
     if 'session_history' not in st.session_state:
@@ -55,8 +33,6 @@ def audio_spectrogram():
     # Function to query the Hugging Face model
     def query_audio_model(audio_data):
         try:
-            API_URL = st.secrets["AST_API_KEY"]
-            headers = {"Authorization": f"Bearer {st.secrets['api_key']}"}
             response = requests.post(API_URL, headers=headers, data=audio_data)
             response.raise_for_status()
             return response.json()
