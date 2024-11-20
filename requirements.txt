@@ -1,6 +1,7 @@
 streamlit
 streamlit_option_menu
 gtts
+pycryptodome
 PyPDF2
 google-generativeai
 python-dotenv==1.0.1
@@ -19,5 +20,4 @@ transformers==4.43.3
 sentence-transformers==3.0.1
 nltk==3.8.1
 mtranslate
-pycryptodome
 bcrypt
